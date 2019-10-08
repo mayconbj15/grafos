@@ -65,7 +65,6 @@ void Graph::DFSUtil(int v, bool visited[])
     // adjacent to this vertex 
     list<char>::iterator i; 
     for(i = adj[v].begin(); i != adj[v].end(); i++) 
-        cout << "CARAI " << *i << "\n";
         if(!visited[*i]) 
             DFSUtil(*i, visited); 
 } 
@@ -127,10 +126,10 @@ int main()
         for(int j=0; j<edges; j++){
             string atualLigation;
         
-            getline(cin, atualLigation);[]
+            getline(cin, atualLigation);
             g.createLigation(atualLigation);
         }
-        g.showTheConnectedComponents(g, i);
+        g.showTheConnectedComponents(g, i+1);
     }
 
     return 0; 

@@ -8,6 +8,7 @@
 #include <vector> 
 
 using namespace std; 
+
 class Vertex{
    
     
@@ -16,13 +17,18 @@ public:
     int y; 
 
     Vertex(int x, int y);   // Constructor 
+    void showVertex();
 }; 
 
 Vertex::Vertex(int x, int y) 
 { 
     this->x = x;
     this->y = y;
-} 
+}
+
+void Vertex::showVertex() {
+    cout << "(" << this->x << ", " << this->y << ")\n"; 
+}
 
 class Graph{
     public:
@@ -35,36 +41,34 @@ class Graph{
 
         void dijkstra(int src);
 
-        int printSolution(int dist[]);
+        int printSolution(double dist[]);
 
-        int minDistance(int dist[], bool sptSet[]);
+        int minDistance(double dist[], bool sptSet[]);
 
         double calculaDistancia(Vertex a, Vertex b);
 
         void print();
+
+        void printArray(double array[]);
 
         void inicializaGrafo();
 };
 
 Graph::Graph(int V){
     this->V = V;
-    this->graph = (double**)malloc(V*V);
-
-    cout << this->V;
-    inicializaGrafo();
 }
 
 void Graph::inicializaGrafo(){
     cout << "INICIALIZA GRAFO \n";
     
-    for(int i=0; i<V; i++){
-        for(int j=0; j<V; j++){
-            this->graph[i][j] = 0;
-            cout << "teste\n";
+    this->graph = (double**)malloc(this->V * sizeof(double*)); //Aloca um Vetor de Ponteiros
+ 
+    for (int i = 0; i < this->V; i++){ //Percorre as linhas do Vetor de Ponteiros
+        this->graph[i] = (double*) malloc(this->V * sizeof(double)); //Aloca um Vetor de Inteiros para cada posição do Vetor de Ponteiros.
+        for (int j = 0; j < this->V; j++){ //Percorre o Vetor de Inteiros atual.
+                this->graph[i][j] = 0; //Inicializa com 0.
         }
     }
-
-    this->print();
 }
 
 void Graph::geraGrafo(vector<Vertex> lista, int V){
@@ -76,8 +80,11 @@ void Graph::geraGrafo(vector<Vertex> lista, int V){
             if(i != j){
                 distance = calculaDistancia(lista.at(i), lista.at(j));
                 this->graph[i][j] = distance;
-                cout << "DISTANCIA: " << distance; 
-                this->print();
+                /*cout << "DISTANCIA: "; 
+                lista.at(i).showVertex();
+                lista.at(j).showVertex();
+                cout << distance << "\n";
+                this->print();*/
             }
 
         }
@@ -85,11 +92,11 @@ void Graph::geraGrafo(vector<Vertex> lista, int V){
 }
 
 void Graph::print(){
-    cout << "GRAFO";
+    cout << "GRAFO \n";
 
     for(int i=0; i<this->V; i++){
         for(int j=0; j<this->V; j++){
-            cout << this->graph[i][j];
+            cout << this->graph[i][j] << " ";
         }
         cout << "\n";
     }
@@ -114,10 +121,11 @@ double Graph::calculaDistancia(Vertex a, Vertex b){
   
 // A utility function to find the vertex with minimum distance value, from 
 // the set of vertices not yet included in shortest path tree 
-int Graph::minDistance(int dist[], bool sptSet[]) 
+int Graph::minDistance(double dist[], bool sptSet[]) 
 { 
     // Initialize min value 
-    int min = INT_MAX, min_index; 
+    double min = INT_MAX;
+    int min_index; 
   
     for (int v = 0; v < V; v++) 
         if (sptSet[v] == false && dist[v] <= min) 
@@ -127,23 +135,24 @@ int Graph::minDistance(int dist[], bool sptSet[])
 } 
   
 // A utility function to print the constructed distance array 
-int Graph::printSolution(int dist[]) 
+int Graph::printSolution(double dist[]) 
 { 
     printf("Vertex \t\t Distance from Source\n"); 
     for (int i = 0; i < this->V; i++) 
-        printf("%d \t\t %d\n", i, dist[i]); 
+        printf("%d \t\t %lf\n", i, dist[i]); 
 } 
   
 // Function that implements Dijkstra's single source shortest path algorithm 
 // for a graph represented using adjacency matrix representation 
 void Graph::dijkstra(int src) 
 { 
-    int dist[V]; // The output array.  dist[i] will hold the shortest 
+    double dist[V]; // The output array.  dist[i] will hold the shortest 
     // distance from src to i 
     
     bool sptSet[V]; // sptSet[i] will be true if vertex i is included in shortest 
     // path tree or shortest distance from src to i is finalized 
-  
+    
+    
     // Initialize all distances as INFINITE and stpSet[] as false 
     for (int i = 0; i < V; i++) 
         dist[i] = INT_MAX, sptSet[i] = false; 
@@ -156,7 +165,8 @@ void Graph::dijkstra(int src)
         // Pick the minimum distance vertex from the set of vertices not 
         // yet processed. u is always equal to src in the first iteration. 
         int u = minDistance(dist, sptSet); 
-  
+        cout << "MIN INDEX OF" << count << ": " << u << "\n";
+
         // Mark the picked vertex as processed 
         sptSet[u] = true; 
   
@@ -170,11 +180,17 @@ void Graph::dijkstra(int src)
                 && dist[u] + this->graph[u][v] < dist[v]) 
                 dist[v] = dist[u] + this->graph[u][v]; 
     } 
-  
+    printArray(dist);
     // print the constructed distance array 
     printSolution(dist); 
 }
 
+void Graph::printArray(double array[]){
+    for(int i=0; i < V; i++){
+        cout << array[i] << " ";
+    }
+    cout << "\n";
+}
 
   
 // driver program to test above function 
@@ -182,17 +198,20 @@ int main()
 { 
     Graph graph(5);
 
-    graph.print();
+        
+    graph.inicializaGrafo();
 
     vector<Vertex> lista;
 
     lista.push_back(Vertex(0,0));
-    lista.push_back(Vertex(0,1));
-    lista.push_back(Vertex(1,2));
-    lista.push_back(Vertex(2,4));
-    lista.push_back(Vertex(3,3));
+    lista.push_back(Vertex(0,100));
+    lista.push_back(Vertex(100,200));
+    lista.push_back(Vertex(200,400));
+    lista.push_back(Vertex(300,300));
 
     graph.geraGrafo(lista, graph.V);
+
+    graph.print();
   
     graph.dijkstra(0); 
   

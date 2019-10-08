@@ -1,0 +1,5 @@
+#executaveis
+*.exe 
+
+#entradas de teste
+*.txt
