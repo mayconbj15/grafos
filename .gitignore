@@ -1,5 +1,5 @@
 #executaveis
-*.exe 
+resoluções/*.exe 
 
 #entradas de teste
 *.txt
