@@ -5,7 +5,8 @@
 #include <stdlib.h>
 #include <limits.h>
 #include <math.h>
-#include <vector> 
+#include <vector>
+#include <iomanip> 
 
 using namespace std; 
 
@@ -255,7 +256,8 @@ int main()
 
         //graph.print();
 
-        printf("%.2lf \n", (graph.primMST())/100 );
+        printf("%.2lf \n\n", (graph.primMST())/100 );
+     
     }
     
     return 0; 
