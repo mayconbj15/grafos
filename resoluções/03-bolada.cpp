@@ -93,39 +93,33 @@ void Graph::print(){
 }
 
 int main() {
-    int quantTest;
     int vertex;
     int edges;
     
-    cin >> quantTest; //receive the cases of test
+    cin >> vertex; //receive the number of vertex
+    cin >> edges; //receive the number of edges
     
+    //buffer to clear the '\n' character of the input above
+    string buffer;
+    getline(cin, buffer);
+    
+    Graph g(vertex);
+    
+    for(int j=0; j<edges; j++){
+        string atualLigation;
+    
+        getline(cin, atualLigation);
+        
+        g.createLigation(atualLigation);
 
-    for(int i=0; i<quantTest; i++){
-        cin >> vertex; //receive the number of vertex
-        cin >> edges; //receive the number of edges
-        
-       
-        //buffer to clear the '\n' character of the input above
-        string buffer;
-        getline(cin, buffer);
-        
-        Graph g(vertex);
-        
-        for(int j=0; j<edges; j++){
-            string atualLigation;
-        
-            getline(cin, atualLigation);
-            
-            g.createLigation(atualLigation);
-
-            //g.print();
-        }
-
-        if(g.verifyBolado(g.graph, 0))
-            cout << "Bolada\n";
-        else
-            cout << "Nao bolada\n";
+        //g.print();
     }
+
+    if(g.verifyBolado(g.graph, 0))
+        cout << "Bolada\n";
+    else
+        cout << "Nao bolada\n";
+    
         
     return 0;  
 }

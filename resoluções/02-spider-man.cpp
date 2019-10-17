@@ -59,7 +59,7 @@ Graph::Graph(int V){
 }
 
 void Graph::inicializaGrafo(){
-    cout << "INICIALIZA GRAFO \n";
+    //cout << "INICIALIZA GRAFO \n";
     
     this->graph = (double**)malloc(this->V * sizeof(double*)); //Aloca um Vetor de Ponteiros
  
@@ -211,7 +211,7 @@ int main()
 
     graph.geraGrafo(lista, graph.V);
 
-    graph.print();
+    //graph.print();
   
     graph.dijkstra(0); 
   

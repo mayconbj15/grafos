@@ -28,7 +28,7 @@ Vertex::Vertex(int x, int y)
 }
 
 void Vertex::showVertex() {
-    cout << "(" << this->x << ", " << this->y << ")\n"; 
+    cout << "(" << this->x << ", " << this->y << ") "; 
 }
 
 class Graph{
@@ -79,21 +79,39 @@ void Graph::inicializaGrafo(){
 void Graph::geraGrafo(vector<Vertex> lista, int V){
     //double graph[V][V];
     double distance;
-
-    for(int i=0; i<lista.size(); i++){
-        for(int j=0; j<lista.size(); j++){
-            if(i != j){
-                distance = calculaDistancia(lista.at(i), lista.at(j));
-                this->graph[i][j] = distance;
-                /*cout << "DISTANCIA: "; 
-                lista.at(i).showVertex();
-                lista.at(j).showVertex();
-                cout << distance << "\n";
-                this->print();*/
-            }
-
+    int i,j = 0;
+    
+    Vertex** vertex;
+    vertex = (Vertex**)malloc(this->V * sizeof(Vertex*));
+    
+    for (int i = 0; i < this->V; i++){ //Percorre as linhas do Vetor de Ponteiros
+        vertex[i] = (Vertex*) malloc(this->V * sizeof(Vertex)); //Aloca um Vetor de Inteiros para cada posição do Vetor de Ponteiros.
+        for (int j = 0; j < this->V; j++){ //Percorre o Vetor de Inteiros atual.
+                vertex[i][j] = Vertex(0,0); //Inicializa com 0.
         }
     }
+
+    for(int i=0; i < V; i++){
+        for(int j=0; j < V; j++){
+            vertex[i][j].showVertex();
+        }
+        cout << "\n";
+    }
+    
+    i,j = 0;
+    for( ; i<lista.size(); i++, j++){
+        vertex[i][j] = lista.at(i);    
+    }
+    
+     for(int i=0; i < V; i++){
+        for(int j=0; j < V; j++){
+            vertex[i][j].showVertex();
+        }
+        cout << "\n";
+    }
+
+    /*distance = calculaDistancia(lista.at(i), lista.at(j));
+    this->graph[i][j] = distance;*/
 }
 
 void Graph::print(){
@@ -258,12 +276,8 @@ int main()
         graph.print();
         double sumOfWeigths = graph.primMST(); 
 
-<<<<<<< HEAD
-        printf("%.2f \n", sumOfWeigths/100);
-=======
         printf("%.2lf \n\n", (graph.primMST())/100 );
      
->>>>>>> ce6f221f743e9342ab1c961053e86e1cc388794e
     }
     
     return 0; 

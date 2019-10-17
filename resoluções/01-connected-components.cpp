@@ -59,7 +59,7 @@ void Graph::DFSUtil(int v, bool visited[])
 { 
     // Mark the current node as visited and print it 
     visited[v] = true; 
-    cout << decodeInt(v) << ", "; 
+    cout << decodeInt(v) << ","; 
   
     // Recur for all the vertices 
     // adjacent to this vertex 
