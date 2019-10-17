@@ -13,14 +13,14 @@ class Vertex{
    
     
 public: 
-    int x;
-    int y; 
+    double x;
+    double y; 
 
-    Vertex(int x, int y);   // Constructor 
+    Vertex(double x, double y);   // Constructor 
     void showVertex();
 }; 
 
-Vertex::Vertex(int x, int y) 
+Vertex::Vertex(double x, double y) 
 { 
     this->x = x;
     this->y = y;
@@ -62,6 +62,8 @@ class Graph{
 
 Graph::Graph(int V){
     this->V = V;
+
+    inicializaGrafo();
 }
 
 void Graph::inicializaGrafo(){    
@@ -81,7 +83,7 @@ void Graph::geraGrafo(vector<Vertex> lista, int V){
 
     for(int i=0; i<lista.size(); i++){
         for(int j=0; j<lista.size(); j++){
-            if(i != j){
+            
                 distance = calculaDistancia(lista.at(i), lista.at(j));
                 this->graph[i][j] = distance;
                 /*cout << "DISTANCIA: "; 
@@ -89,7 +91,7 @@ void Graph::geraGrafo(vector<Vertex> lista, int V){
                 lista.at(j).showVertex();
                 cout << distance << "\n";
                 this->print();*/
-            }
+            
 
         }
     }
@@ -107,7 +109,7 @@ void Graph::print(){
 }
 
 double Graph::calculaDistancia(Vertex a, Vertex b){
-    double distance;
+    double distance = 0.0;
 
     distance = sqrt(pow((b.x - a.x),2) + pow((b.y - a.y),2));
 
@@ -154,8 +156,10 @@ void Graph::printMST(int parent[])
 double Graph::sumOfWeights(int parent[]){
     double sum = 0.0;
 
-    for (int i = 0; i < V; i++)  
+    for (int i = 1; i < V; i++){  
         sum += this->graph[i][parent[i]];
+        cout << "menor " << graph[i][parent[i]];
+    }
 
     return sum;
 }
@@ -233,7 +237,7 @@ int main()
         cin >> num_vertex;
         Graph graph(num_vertex);
 
-        graph.inicializaGrafo();
+        //graph.inicializaGrafo();
 
         string buffer;
         getline(cin, buffer);
@@ -255,9 +259,10 @@ int main()
         graph.geraGrafo(lista, graph.V);
 
         graph.print();
+
         double sumOfWeigths = graph.primMST(); 
 
-        printf("%.2f \n", sumOfWeigths/100);
+        printf("%.2f \n\n", sumOfWeigths/100);
     }
     
     return 0; 

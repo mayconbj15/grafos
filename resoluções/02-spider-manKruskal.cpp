@@ -10,8 +10,7 @@
 using namespace std; 
 
 class Vertex{
-   
-    
+
 public: 
     int x;
     int y; 
@@ -30,11 +29,23 @@ void Vertex::showVertex() {
     cout << "(" << this->x << ", " << this->y << ")\n"; 
 }
 
+// a structure to represent a weighted edge in graph  
+class Edge  
+{  
+    public: 
+    int src, dest, weight;  
+}; 
+
 class Graph{
     public:
-        int V;
+        int V, E;
         double** graph;
-
+        
+        // graph is represented as an array of edges.  
+        // Since the graph is undirected, the edge  
+        // from src to dest is also edge from dest  
+        // to src. Both are counted as 1 edge here.  
+        Edge* edge; 
         Graph(int V);
 
         void geraGrafo(vector<Vertex> lista, int V);
@@ -47,11 +58,6 @@ class Graph{
 
         void inicializaGrafo();
 
-        int minKey(double key[], bool mstSet[]);
-
-        void printMST(int parent[]); 
-
-        double primMST();  
 
         double sumOfWeights(int parent[]);
 
@@ -123,93 +129,122 @@ vector<Vertex> Graph::addEdge(double v, double w, vector<Vertex> lista) {
     
     return lista;
 } 
-  
-// A utility function to find the vertex with  
-// minimum key value, from the set of vertices  
-// not yet included in MST  
-int Graph::minKey(double key[], bool mstSet[])  
-{  
-    // Initialize min value  
-    double min = INT_MAX;
-    int min_index;  
-  
-    for (int v = 0; v < V; v++)  
-        if (mstSet[v] == false && key[v] < min)  
-            min = key[v], min_index = v;  
-  
-    return min_index;  
-}  
-  
-// A utility function to print the  
-// constructed MST stored in parent[]  
-void Graph::printMST(int parent[])  
-{  
-    cout<<"Edge \tWeight\n";  
-    for (int i = 1; i < V; i++)  
-        cout<<parent[i]<<" - "<<i<<" \t"<<this->graph[i][parent[i]]<<" \n";  
-
-    
-}
 
 double Graph::sumOfWeights(int parent[]){
     double sum = 0.0;
 
-    for (int i = 0; i < V; i++)  
+    for (int i = 1; i < V; i++)  
         sum += this->graph[i][parent[i]];
 
     return sum;
 }
-  
-// Function to construct and print MST for  
-// a graph represented using adjacency  
-// matrix representation  
-double Graph::primMST()  
+
+// A structure to represent a subset for union-find  
+class subset  
 {  
-    // Array to store constructed MST  
-    int parent[V];  
-      
-    // Key values used to pick minimum weight edge in cut  
-    double key[V];  
-      
-    // To represent set of vertices not yet included in MST  
-    bool mstSet[V];  
+    public: 
+    int parent;  
+    int rank;  
+};  
   
-    // Initialize all keys as INFINITE  
-    for (int i = 0; i < V; i++)  
-        key[i] = INT_MAX, mstSet[i] = false;  
+// A utility function to find set of an element i  
+// (uses path compression technique)  
+int find(subset subsets[], int i)  
+{  
+    // find root and make root as parent of i  
+    // (path compression)  
+    if (subsets[i].parent != i)  
+        subsets[i].parent = find(subsets, subsets[i].parent);  
   
-    // Always include first 1st vertex in MST.  
-    // Make key 0 so that this vertex is picked as first vertex.  
-    key[0] = 0;  
-    parent[0] = -1; // First node is always root of MST  
+    return subsets[i].parent;  
+}  
   
-    // The MST will have V vertices  
-    for (int count = 0; count < V - 1; count++) 
+// A function that does union of two sets of x and y  
+// (uses union by rank)  
+void Union(subset subsets[], int x, int y)  
+{  
+    int xroot = find(subsets, x);  
+    int yroot = find(subsets, y);  
+  
+    // Attach smaller rank tree under root of high  
+    // rank tree (Union by Rank)  
+    if (subsets[xroot].rank < subsets[yroot].rank)  
+        subsets[xroot].parent = yroot;  
+    else if (subsets[xroot].rank > subsets[yroot].rank)  
+        subsets[yroot].parent = xroot;  
+  
+    // If ranks are same, then make one as root and  
+    // increment its rank by one  
+    else
     {  
-        // Pick the minimum key vertex from the  
-        // set of vertices not yet included in MST  
-        int u = minKey(key, mstSet);  
+        subsets[yroot].parent = xroot;  
+        subsets[xroot].rank++;  
+    }  
+}  
   
-        // Add the picked vertex to the MST Set  
-        mstSet[u] = true;  
+// Compare two edges according to their weights.  
+// Used in qsort() for sorting an array of edges  
+int myComp(const void* a, const void* b)  
+{  
+    Edge* a1 = (Edge*)a;  
+    Edge* b1 = (Edge*)b;  
+    return a1->weight > b1->weight;  
+}  
   
-        // Update key value and parent index of  
-        // the adjacent vertices of the picked vertex.  
-        // Consider only those vertices which are not  
-        // yet included in MST  
-        for (int v = 0; v < V; v++)  
-            // graph[u][v] is non zero only for adjacent vertices of m  
-            // mstSet[v] is false for vertices not yet included in MST  
-            // Update the key only if graph[u][v] is smaller than key[v]  
-            if (graph[u][v] && mstSet[v] == false && graph[u][v] < key[v])  
-                parent[v] = u, key[v] = graph[u][v];  
+// The main function to construct MST using Kruskal's algorithm  
+void KruskalMST(Graph* graph)  
+{  
+    int V = graph->V;  
+    Edge result[V]; // Tnis will store the resultant MST  
+    int e = 0; // An index variable, used for result[]  
+    int i = 0; // An index variable, used for sorted edges  
+  
+    // Step 1: Sort all the edges in non-decreasing  
+    // order of their weight. If we are not allowed to  
+    // change the given graph, we can create a copy of  
+    // array of edges  
+    qsort(graph->edge, graph->E, sizeof(graph->edge[0]), myComp);  
+  
+    // Allocate memory for creating V ssubsets  
+    subset *subsets = new subset[( V * sizeof(subset) )];  
+  
+    // Create V subsets with single elements  
+    for (int v = 0; v < V; ++v)  
+    {  
+        subsets[v].parent = v;  
+        subsets[v].rank = 0;  
     }  
   
-    // print the constructed MST  
-    printMST(parent);  
-    return sumOfWeights(parent);
-}
-
+    // Number of edges to be taken is equal to V-1  
+    while (e < V - 1 && i < graph->E)  
+    {  
+        // Step 2: Pick the smallest edge. And increment  
+        // the index for next iteration  
+        Edge next_edge = graph->edge[i++];  
+  
+        int x = find(subsets, next_edge.src);  
+        int y = find(subsets, next_edge.dest);  
+  
+        // If including this edge does't cause cycle,  
+        // include it in result and increment the index  
+        // of result for next edge  
+        if (x != y)  
+        {  
+            result[e++] = next_edge;  
+            Union(subsets, x, y);  
+        }  
+        // Else discard the next_edge  
+    }  
+  
+    // print the contents of result[] to display the  
+    // built MST  
+    cout<<"Following are the edges in the constructed MST\n";  
+    for (i = 0; i < e; ++i)  
+        cout<<result[i].src<<" -- "<<result[i].dest<<" == "<<result[i].weight<<endl;  
+    return;  
+}  
+  
+  
 vector<string> split(string strToSplit, char delimeter) {
     stringstream ss(strToSplit);
     string item;
@@ -246,18 +281,21 @@ int main()
             getline(cin, atualLigation);
 
             vector<string> result = split(atualLigation, ' '); 
-            atualLigation = "";
             
             lista = graph.createLigation(result, lista);
         }
 
+        for(int i=0; i < graph.V; i++){
+            cout << "Lista: " << lista.at(i).x << " " << lista.at(i).y;
+        }
 
         graph.geraGrafo(lista, graph.V);
 
-        graph.print();
+//        graph.print();
         double sumOfWeigths = graph.primMST(); 
+        cout << "sumOfWeigths" << sumOfWeigths << "\n";
 
-        printf("%.2f \n", sumOfWeigths/100);
+        printf("%.2lf \n", sumOfWeigths/100);
     }
     
     return 0; 
