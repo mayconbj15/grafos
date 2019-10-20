@@ -8,6 +8,8 @@
 #include <vector>
 #include <iomanip> 
 
+#define MAX_COORDENADA 10000
+
 using namespace std; 
 
 class Vertex{
@@ -136,10 +138,13 @@ bool hasVertex(Vertex vertex, vector<Vertex> lista){
 
 
 vector<Vertex> addEdge(double v, double w, vector<Vertex> lista) { 
-    Vertex vertex = Vertex(v,w);
+    if(v >= 0 && v <= MAX_COORDENADA && w >= 0 && w <= MAX_COORDENADA){
+        Vertex vertex = Vertex(v,w);
+    
     
     if(!hasVertex(vertex, lista))
         lista.push_back(vertex);
+    }
     
     return lista;
 } 

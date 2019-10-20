@@ -8,6 +8,8 @@
 #include <vector>
 #include <iomanip> 
 
+#define MAX_COORDENADA 10000
+
 using namespace std; 
 
 class Vertex{
@@ -31,6 +33,10 @@ void Vertex::showVertex() {
     cout << "(" << this->x << ", " << this->y << ")\n"; 
 }
 
+vector<Vertex> createLigation(int x, int y, vector<Vertex> lista);
+bool hasVertex(Vertex vertex, vector<Vertex> lista);
+vector<Vertex> addEdge(int v, int w, vector<Vertex> lista);
+
 class Graph{
     public:
         int V;
@@ -41,7 +47,7 @@ class Graph{
         void geraGrafo(vector<Vertex> lista, int V);
 
         double calculaDistancia(Vertex a, Vertex b);
-
+        
         void print();
 
         void printArray(double array[]);
@@ -56,9 +62,7 @@ class Graph{
 
         double sumOfWeights(int parent[]);
 
-        vector<Vertex> createLigation(vector<string> ligation, vector<Vertex> lista);
-
-        vector<Vertex> addEdge(double v, double w, vector<Vertex> lista);
+      
 };
 
 Graph::Graph(int V){
@@ -115,12 +119,30 @@ double Graph::calculaDistancia(Vertex a, Vertex b){
     return distance;
 }
 
-vector<Vertex> Graph::createLigation(vector<string> ligation, vector<Vertex> lista){
-    return addEdge(stod(ligation[0]), stod(ligation[1]), lista);
+vector<Vertex> createLigation(int x, int y, vector<Vertex> lista){
+    return addEdge(x, y, lista);
 }
 
-vector<Vertex> Graph::addEdge(double v, double w, vector<Vertex> lista) { 
-    lista.push_back(Vertex(v,w));
+bool hasVertex(Vertex vertex, vector<Vertex> lista){
+    bool hasVertex = false;
+    
+    for(int i=0; hasVertex == false && i < lista.size(); i++){
+        if(vertex.x == lista[i].x && vertex.y == lista[i].y)
+            hasVertex = true;
+    }
+    
+    return hasVertex;
+}
+
+
+vector<Vertex> addEdge(int v, int w, vector<Vertex> lista) { 
+    if(v >= 0 && v <= MAX_COORDENADA && w >= 0 && w <= MAX_COORDENADA){
+        Vertex vertex = Vertex(v,w);
+    
+    
+    if(!hasVertex(vertex, lista))
+        lista.push_back(vertex);
+    }
     
     return lista;
 } 
@@ -207,7 +229,7 @@ double Graph::primMST()
     }  
   
     // print the constructed MST  
-    printMST(parent);  
+    //printMST(parent);  
     return sumOfWeights(parent);
 }
 
@@ -228,42 +250,35 @@ int main()
     int cases;
     int num_vertex;
 
+    int x,y;
+
     cin >> cases;
 
     for(int i=0; i < cases; i++){
         cin >> num_vertex;
-        Graph graph(num_vertex);
-
-        graph.inicializaGrafo();
-
-        string buffer;
-        getline(cin, buffer);
         
         vector<Vertex> lista;
 
         for(int j=0; j<num_vertex; j++){
-            string atualLigation;
-        
-            getline(cin, atualLigation);
-
-            vector<string> result = split(atualLigation, ' '); 
-            atualLigation = "";
+            cin >> x;
+            cin >> y;
             
-            lista = graph.createLigation(result, lista);
+            lista = createLigation(x, y, lista);
         }
+        
+        Graph graph(lista.size());
+        
+        //cout << lista.size();
 
-
+        graph.inicializaGrafo();
+        
         graph.geraGrafo(lista, graph.V);
 
-        graph.print();
-        double sumOfWeigths = graph.primMST(); 
+        //graph.print();
+        //double sumOfWeigths = graph.primMST(); 
 
-<<<<<<< HEAD
-        printf("%.2f \n", sumOfWeigths/100);
-=======
-        printf("%.2lf \n\n", (graph.primMST())/100 );
+        printf("%.2lf\n\n", (graph.primMST())/100 );
      
->>>>>>> ce6f221f743e9342ab1c961053e86e1cc388794e
     }
     
     return 0; 

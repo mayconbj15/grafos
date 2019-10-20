@@ -12,113 +12,154 @@ using namespace std;
 class Graph{
     public:
         int V;
-        int** graph;
+        list<int> *adj;
 
         Graph(int V);
 
         void initializeGraph();
-        
-        void print();
-
-        void createLigation(string ligation);
-
-        void addEdge(char u, char v);
-
-        void addEdge(int u, int v);
-
+        void createLigation(int x, int y);
         bool verifyBolado(int** graph, int v);
+        bool isSC();
+        Graph getTranspose(); 
 
+        void DFSUtil(int v, bool visited[]) ; 
+        void verifyBolado();
+    private:
+        void addEdge(int u, int v);
         bool verifyBolado(int** graph, int v, bool bolado);
 };
 
 Graph::Graph(int V){
     this->V = V;
-
-    initializeGraph();
-}
-
-void Graph::initializeGraph(){    
-    this->graph = (int**)malloc(this->V * sizeof(int*)); //Aloca um Vetor de Ponteiros
- 
-    for (int i = 0; i < this->V; i++){ //Percorre as linhas do Vetor de Ponteiros
-        this->graph[i] = (int*) malloc(this->V * sizeof(int)); //Aloca um Vetor de Inteiros para cada posição do Vetor de Ponteiros.
-        for (int j = 0; j < this->V; j++){ //Percorre o Vetor de Inteiros atual.
-                this->graph[i][j] = 0; //Inicializa com 0.
-        }
-    }
+    adj = new list<int>[V]; 
 }
 
 
-void Graph::createLigation(string ligation){
-    addEdge(ligation.at(0), ligation.at(2));
-}
 
-void Graph::addEdge(char u, char v){
-    addEdge((int)u - 48, (int)v - 48);
+void Graph::createLigation(int x, int y){
+    addEdge(x, y);
 }
 
 void Graph::addEdge(int u, int v) {
-    this->graph[u-1][v-1] = 1;
+    adj[u].push_back(v); // Add w to v’s list.
 }
+void Graph::verifyBolado() 
+{ 
+    // Mark all the vertices as not visited 
+    bool *visited = new bool[V]; 
+    vector<int> listOfVertex;
 
-bool Graph::verifyBolado(int** graph, int v) {
-    return verifyBolado(graph, v, false);
-}
+    for(int v = 0; v < V; v++) 
+        visited[v] = false; 
+    
+    int connectedComponents = 0;
 
-bool Graph::verifyBolado(int** graph, int v, bool bolado) {
-    if(v < this->V){
-        bolado = false;    
-
-        for(int j=0; j < this->V; j++){
-            if(this->graph[v][j] == 1){
-                bolado = true;
-                bolado = verifyBolado(this->graph, v+1, bolado);
-            }
-        }
-        
-    }
+    for (int v=2; v<V; v++) 
+    { 
+        if (visited[v] == false) 
+        { 
+            // print all reachable vertices 
+            // from v 
+             DFSUtil(v, visited); 
+            
+        } 
+    } 
+} 
   
-    return bolado;
-}
+void Graph::DFSUtil(int v, bool visited[]) 
+{ 
+    // Mark the current node as visited and print it 
+    visited[v] = true; 
+    //cout << v << endl;
+  
+    // Recur for all the vertices 
+    // adjacent to this vertex 
+    list<int>::iterator i; 
+    for(i = adj[v].begin(); i != adj[v].end(); i++) 
+        if(!visited[*i]) 
+            DFSUtil(*i, visited); 
 
-void Graph::print(){
-    cout << "GRAFO \n";
+} 
 
-    for(int i=0; i<this->V; i++){
-        for(int j=0; j<this->V; j++){
-            cout << this->graph[i][j] << " ";
-        }
-        cout << "\n";
-    }
-}
+bool Graph::isSC() 
+{ 
+    // St1p 1: Mark all the vertices as not visited (For first DFS) 
+    bool visited[V]; 
+    
+    for (int i = 0; i < V; i++) 
+        visited[i] = false; 
+  
+    // Step 2: Do DFS traversal starting from first vertex. 
+    //cout << "Normal\n";
+    /*DFSUtil(0, visited); 
+  
+     // If DFS traversal doesn’t visit all vertices, then return false. 
+    for (int i = 0; i < V; i++) 
+        if (visited[i] == false) 
+             return false; */
+  
+    // Step 3: Create a reversed graph 
+    Graph gr = getTranspose(); 
+  
+    // Step 4: Mark all the vertices as not visited (For second DFS) 
+    for(int i = 0; i < V; i++) 
+        visited[i] = false; 
+  
+    // Step 5: Do DFS for reversed graph starting from first vertex. 
+    // Staring Vertex must be same starting point of first DFS 
+    //cout << "Transpose\n";
+    gr.DFSUtil(0, visited); 
+  
+    // If all vertices are not visited in second DFS, then 
+    // return false 
+    for (int i = 0; i < V; i++) 
+        if (visited[i] == false) 
+             return false; 
+  
+    return true; 
+} 
+
+Graph Graph::getTranspose() 
+{ 
+    Graph g(V); 
+    for (int v = 0; v < V; v++) 
+    { 
+        // Recur for all the vertices adjacent to this vertex 
+        list<int>::iterator i; 
+        for(i = adj[v].begin(); i != adj[v].end(); ++i) 
+        { 
+            g.adj[*i].push_back(v); 
+        } 
+    } 
+    return g; 
+} 
+
 
 int main() {
     int vertex;
     int edges;
+
+    int x,y;
     
     cin >> vertex; //receive the number of vertex
     cin >> edges; //receive the number of edges
     
-    //buffer to clear the '\n' character of the input above
-    string buffer;
-    getline(cin, buffer);
-    
     Graph g(vertex);
     
     for(int j=0; j<edges; j++){
-        string atualLigation;
-    
-        getline(cin, atualLigation);
+        cin >> x;
+        cin >> y;
         
-        g.createLigation(atualLigation);
-
+        g.createLigation(x-1, y-1);
         //g.print();
     }
+    
+    g.isSC()? cout << "Bolada\n" : cout << "Nao bolada\n";
 
-    if(g.verifyBolado(g.graph, 0))
-        cout << "Bolada\n";
+    /*if(g.verifyBolado(g.graph))
+        cout << "Bolada \n";
     else
-        cout << "Nao bolada\n";
+        cout << "Nao bolada \n";*/
     
         
     return 0;  
