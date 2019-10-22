@@ -1,5 +1,6 @@
 #include <iostream>
 #include <vector>
+#include <limits.h>
 
 #include <stdlib.h>
 
@@ -90,29 +91,29 @@ int Graph::minDistance(int dist[], bool sptSet[]){
 int Graph::printSolution(int dist[]){ 
     printf("Vertex \t\t Distance from Source\n"); 
     for (int i = 0; i < V; i++) {
-        printf("%d \t\t %d\n", i+1, dist[i]); 
+        printf("%d \t\t %d\n", i, dist[i]); 
     }
 } 
 
-int Graph::printParent(int parent[]){
+int Graph::printParent(int* parent){
     for(int i=0; i < V; i++){
-        printf("Parent: %d \t\t %d\n", i+1, parent[i]);
+        printf("Parent: %d \t\t %d\n", i, parent[i]);
     }
 }
 
-int showRoute(int parent[], int vertex){
+int showRoute(int* parent, int vertex){
     if(vertex != 0){
         showRoute(parent, parent[vertex]);
-        printf("Route: %d ", parent[vertex]);
+        printf("%d ", parent[vertex]);
     }
 }
   
 // Function that implements Dijkstra's single source shortest path algorithm 
 // for a graph represented using adjacency matrix representation 
 int Graph::dijkstra(int src){ 
-    int parent[V];
+    int* parent = (int*)malloc(V * sizeof(int));
 
-    int dist[V]; // The output array.  dist[i] will hold the shortest 
+    int* dist = (int*)malloc(V * sizeof(int)); // The output array.  dist[i] will hold the shortest 
     // distance from src to i 
   
     bool sptSet[V]; // sptSet[i] will be true if vertex i is included in shortest 
@@ -154,7 +155,7 @@ int Graph::dijkstra(int src){
     
     printSolution(dist); 
     printParent(parent);
-    showRoute(parent, 0);
+    cout << "Route: " << showRoute(parent, 0) << endl;
 
     return findLessDistance();
 }
@@ -244,30 +245,32 @@ int main(){
     cin >> nAmigos;
     cin >> acentosDisponiveis;
 
+    //VERIFICAR SE A ROTA JÁ FOI VISITADA 
+    //VERIFICAR O IMPOSSÍVEL 
+
+    int firstRoute = graph.dijkstra(0); // calcular o valor dessa rota
+    int totalDistance = graph.dist[nCidades-1];
+
     if(nAmigos > acentosDisponiveis){
         int nRotas = nAmigos / acentosDisponiveis;
-        int lessVertex = graph.dijkstra(0); // calcular o valor dessa rota
-        cout << "LESS VERTEX " << lessVertex;
-        int totalDistance = graph.dist[lessVertex];
         
-        cout << "DIST " << endl;
+        
+        cout << "FIRST ROUTE: " << firstRoute;
+        
+        cout << "DIST: " ;
 
         for(int i=0; i < graph.V; i++){
                 printf("%d ", graph.dist[i]);
-            }
-        cout << "TOTAL DISTANCE: " << totalDistance << endl;
-
-        cout << "DIST " << endl;
-        for(int i=0; i < graph.V; i++){
-            printf("%d ", graph.dist[i]);
         }
+
+        cout << "\nTOTAL DISTANCE: " << totalDistance << endl;
 
         for(int i=0; i < nRotas-1; i++){
             vector<int> possibleRoutes;
     
             possibleRoutes = graph.getPossibleRoutes();
 
-            possibleRoutes = removeVertex(possibleRoutes, lessVertex);
+            possibleRoutes = removeVertex(possibleRoutes, firstRoute);
 
             cout << "Possible routes\n";
 
@@ -281,15 +284,13 @@ int main(){
 
             int nextRoute = getLessDistanceOfPossibleRoutes(possibleRoutes, graph.dist);
 
-            cout << "Next route " << nextRoute << endl;
-
-            //graph.dijkstra(nextRoute);
-           
+            cout << "Next route " << nextRoute << endl;           
 
             int distanceNextRouteToSource = graph.dist[nextRoute];
             cout << "Distance Next Route to Source " << distanceNextRouteToSource << endl;
             
-            totalDistance += distanceNextRouteToSource + graph.dijkstra(nextRoute);
+            firstRoute = graph.dijkstra(nextRoute);
+            totalDistance += distanceNextRouteToSource + graph.dist[nCidades-1];
 
             cout << "Total distance: " << totalDistance << endl;
         }
@@ -299,5 +300,7 @@ int main(){
     graph.print();
 
     cout << "Less Vertex " << graph.dijkstra(0);
+
+    cout << "TOTAL DISTANCE: " << totalDistance << endl;
 
 }
