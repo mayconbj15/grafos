@@ -38,6 +38,8 @@ class Graph{
         int dijkstra(int src, int** graphOfRoutes);  
 
         int findNextVertexSource(int src);
+
+        int getLessDistance();
       
 };
 
@@ -186,7 +188,18 @@ int Graph::dijkstra(int src, int** graphOfRoutes){
 
     //return findNextVertexSource(src);
 
-    return dist[V-1];
+    return getLessDistance();
+}
+
+int Graph::getLessDistance(){
+    int lessDistance = dist[1];
+
+    for(int i=2; i < V; i++){
+        if(dist[i] < lessDistance)
+            lessDistance = dist[i];
+    }
+
+    return lessDistance;
 }
 
 vector<int> removeVertex(vector<int> possibleRoutes, int v){
@@ -277,21 +290,11 @@ int main(){
     //VERIFICAR SE A ROTA JÁ FOI VISITADA 
     //VERIFICAR O IMPOSSÍVEL 
 
-    int nextRoute = graph.dijkstra(0, graphOfRoutes.graph); // calcular o valor dessa rota
-    int totalDistance = graph.dist[nCidades-1];
+    int totalDistance = graph.dijkstra(0, graphOfRoutes.graph); // calcular o valor dessa rota
+    cout << "LESS DISTANCE " << totalDistance;
 
     if(nAmigos > acentosDisponiveis){
         int nRotas = nAmigos / acentosDisponiveis;
-        
-        /*graph.dijkstra(nCidades-1);
-
-        cout << "FIRST ROUTE: " << nextRoute;
-        
-        cout << "DIST: " ;
-
-        for(int i=0; i < graph.V; i++){
-                printf("%d ", graph.dist[i]);
-        }*/
 
         cout << "\nTOTAL DISTANCE: " << totalDistance << endl;
         int src = 0;
@@ -301,15 +304,11 @@ int main(){
         vector<int> weightOfRoutes;
 
         for(int i=nRotas-1; i > 0; i--){
-            
-            int nextRoute = possibleRoutes.at(i);
-            
-            int distanceNextRouteToSource = graph.dist[nextRoute];
-            int actualWeight = graph.dijkstra(nextRoute, graphOfRoutes.graph);
+            int distance = graph.dijkstra(0, graphOfRoutes.graph);
+            cout << "Less distance " << distance;
 
-            weightOfRoutes.push_back(distanceNextRouteToSource+actualWeight);
-            //possibleRoutes = removeVertex(possibleRoutes, nextRoute);
-
+            totalDistance += distance;
+            
             cout << "Possible routes\n";
 
             for(int i=0; i < possibleRoutes.size(); i++){
@@ -321,24 +320,11 @@ int main(){
             cout << "Rotas " << nRotas << endl;
 
             //int nextRoute = getLessDistanceOfPossibleRoutes(possibleRoutes, graph.dist);
-
-            cout << "Next route " << nextRoute << endl;           
-
-            
-
-            cout << "Distance Next Route to Source " << distanceNextRouteToSource << endl;
             
            // nextRoute = graph.dijkstra(nextRoute);
             
         }
-        
-        for(int i=0; i < nRotas-1; i++){
-            totalDistance += getLessRoute(weightOfRoutes);
-        }
-        //totalDistance += distanceNextRouteToSource + graph.dist[nCidades-1];
-
-        //cout << "Total distance: " << totalDistance << endl;
-        
+   
     }
 
     //graph.print();
