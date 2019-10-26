@@ -25,8 +25,6 @@ class Graph{
         void createLigation(int a, int b, int c);
 
         vector<int> getPossibleRoutes(int src);
-        
-        int getLessDistanceOfPossibleRoutes(vector<int>);
 
         /** Diijskra **/
         int minDistance(int dist[], bool sptSet[]);
@@ -35,32 +33,9 @@ class Graph{
 
         int printParent(int parent[]);
 
-        int dijkstra(int src, int** graphOfRoutes);  
-
-        int findNextVertexSource(int src);
-      
+        int dijkstra(int src);  
+   
 };
-
-int getLessRoute(vector<int> weightOfRoutes){
-    int lessRoute = weightOfRoutes.at(0);
-
-    vector<int>::iterator i;
-    vector<int>::iterator j;
-    int k = 0;
-
-    j = weightOfRoutes.begin();
-    for(i = weightOfRoutes.begin(); k < weightOfRoutes.size(); i++, k++){
-        if(weightOfRoutes.at(k) < lessRoute){
-            lessRoute = weightOfRoutes.at(k);
-            j = i;
-        }
-            
-    }
-    
-    weightOfRoutes.erase(j);
-
-    return lessRoute;
-}
 
 Graph::Graph(int V){
     this->V = V;
@@ -121,19 +96,10 @@ int Graph::printParent(int parent[]){
         printf("Parent: %d \t\t %d\n", i, parent[i]);
     }
 }
-
-void showRoute(int parent[], int src, int vertex){
-    if(vertex != src){
-        showRoute(parent, src, parent[vertex]);
-        printf("%d ", vertex);
-    }else{
-        printf("%d ", src);
-    }
-}
   
 // Function that implements Dijkstra's single source shortest path algorithm 
 // for a graph represented using adjacency matrix representation 
-int Graph::dijkstra(int src, int** graphOfRoutes){ 
+int Graph::dijkstra(int src){ 
     int* parent = (int*)malloc(V * sizeof(int));
 
     int* dist = (int*)malloc(V * sizeof(int)); // The output array.  dist[i] will hold the shortest 
@@ -165,27 +131,16 @@ int Graph::dijkstra(int src, int** graphOfRoutes){
             // u to v, and total weight of path from src to  v through u is 
             // smaller than current value of dist[v] 
             if (!sptSet[v] && graph[u][v] && dist[u] != INT_MAX 
-                && dist[u] + graph[u][v] < dist[v]
-                && graphOfRoutes[u][v] != 1){
+                && dist[u] + graph[u][v] < dist[v]){
                     dist[v] = dist[u] + graph[u][v];
                     parent[v] = u; 
-                    graphOfRoutes[u][v] = 1; //set that this edge has visited 
                 } 
                 
     } 
   
-    // print the constructed distance array 
     this->dist = dist;
     this->parent = parent;
     
-    /*printSolution(dist); 
-    printParent(parent);
-    cout << "Route: ";
-    showRoute(parent, src, V-1);
-    cout << endl;*/
-
-    //return findNextVertexSource(src);
-
     return dist[V-1];
 }
 
@@ -201,35 +156,36 @@ vector<int> removeVertex(vector<int> possibleRoutes, int v){
 
     return possibleRoutes;
 }
-/**
- * Return the vertex that have the less distance from the source
- */
 
-int Graph::findNextVertexSource(int src){
-    int lessDistance = dist[1];
-    int vertex = 0;
+void showRoute(int parent[], int src, int vertex){
+    if(vertex != src){
+        showRoute(parent, src, parent[vertex]);
+        printf("%d ", vertex);
+    }else{
+        printf("%d ", src);
+    }
+}
 
-    for(int i=1; i < V; i++){
-        if(dist[graph[src][i]] < lessDistance){
-            vertex = i;
+int getLessRoute(vector<int> weightOfRoutes){
+    int lessRoute = weightOfRoutes.at(0);
+
+    vector<int>::iterator i;
+    vector<int>::iterator j;
+    int k = 0;
+
+    j = weightOfRoutes.begin();
+    for(i = weightOfRoutes.begin(); k < weightOfRoutes.size(); i++, k++){
+        if(weightOfRoutes.at(k) < lessRoute){
+            lessRoute = weightOfRoutes.at(k);
+            j = i;
         }
+            
     }
+    
+    weightOfRoutes.erase(j);
 
-    return vertex;
+    return lessRoute;
 }
-
-int getLessDistanceOfPossibleRoutes(vector<int> possibleRoutes, int dist[]){
-    int nextRoute = dist[possibleRoutes.at(0)];
-
-    for(int i=1; i < possibleRoutes.size(); i++){
-        if(dist[possibleRoutes.at(i)] < nextRoute)
-            nextRoute = possibleRoutes.at(i);
-    }
-
-    return nextRoute;
-}
-
-
 
 vector<int> Graph::getPossibleRoutes(int src){
     vector<int> possibleRoutes;
@@ -247,115 +203,63 @@ int getPeoplesInRoute(int nAmigos, int acentosDisponiveis){
 }
 
 
-
-
 int main(){
     int nRotasVoo, nCidades;
     int nAmigos, acentosDisponiveis;
 
     int instancia = 1;
 
-    //cin >> nCidades;
-    //cin >> nRotasVoo;
     while(scanf("%d %d", &nCidades, &nRotasVoo) != EOF) {
         Graph graph(nCidades);
-        Graph graphOfRoutes(nCidades);
-        graph.print();
-
+        
         for(int i=0; i < nRotasVoo; i++){
             int cidadeA, cidadeB, preco;
-            
-
+        
             cin >> cidadeA;
             cin >> cidadeB;
             cin >> preco;
 
             graph.createLigation(cidadeA, cidadeB, preco);
-            
-            
         }
 
         cin >> nAmigos;
         cin >> acentosDisponiveis;
-
-        //VERIFICAR SE A ROTA JÁ FOI VISITADA 
-        //VERIFICAR O IMPOSSÍVEL 
         
-        int peoplesInRoute = getPeoplesInRoute(nAmigos, acentosDisponiveis);
+        int peoplesInRoute = getPeoplesInRoute(nAmigos, acentosDisponiveis); //take how many people 'll in the route
 
-        int nextRoute = graph.dijkstra(0, graphOfRoutes.graph); // calcular o valor dessa rota
-        int totalPrice = peoplesInRoute * graph.dist[nCidades-1];
-
-        //cout << "TOTAL PRICE" << totalPrice;
+        int currentWeight = graph.dijkstra(0); // calculate the distance of the vertex n-1 to the src
+        int totalPrice = peoplesInRoute * currentWeight; //get the total price of current route
         
-        int nRotas = nAmigos / acentosDisponiveis;
+        int nRotas = nAmigos / acentosDisponiveis; //get the numbers of routes
 
-        if(nAmigos > acentosDisponiveis && nRotas < nRotasVoo){
+        if(nRotas < nRotasVoo){
             int nRotas = nAmigos / acentosDisponiveis;
         
-            //cout << "\nTotal Price: " << totalPrice << endl;
             int src = 0;
             vector<int> possibleRoutes;
-            possibleRoutes = graph.getPossibleRoutes(src);
-
-            vector<int> weightOfRoutes;
+            possibleRoutes = graph.getPossibleRoutes(src); //get the possibles routes from the source
 
             for(int i=nRotas-1; i > 0; i--){
                 
-                int nextRoute = possibleRoutes.at(i);
+                int nextRoute = possibleRoutes.at(i); //get the next route to go
                 
-                int distanceNextRouteToSource = graph.dist[nextRoute];
-                int actualWeight = graph.dijkstra(nextRoute, graphOfRoutes.graph);
+                int distanceNextRouteToSource = graph.dist[nextRoute]; 
+                int currentWeight = graph.dijkstra(nextRoute); //get the current distance 
 
-                actualWeight += distanceNextRouteToSource;
+                currentWeight += distanceNextRouteToSource; //get the total distance of this route
 
-                int actualPrice = peoplesInRoute * actualWeight;
+                int currentPrice = peoplesInRoute * currentWeight;
 
-                weightOfRoutes.push_back(distanceNextRouteToSource + actualWeight);
-                //possibleRoutes = removeVertex(possibleRoutes, nextRoute);
-
-                /*cout << "Possible routes\n";
-
-                for(int i=0; i < possibleRoutes.size(); i++){
-                    printf("%d ", possibleRoutes.at(i));
-                }*/
-
-                /*cout << endl;
-
-                cout << "Rotas " << nRotas << endl;
-
-                //int nextRoute = getLessDistanceOfPossibleRoutes(possibleRoutes, graph.dist);
-
-                cout << "Next route " << nextRoute << endl;           
-
-                
-
-                cout << "Distance Next Route to Source " << distanceNextRouteToSource << endl;*/
-                
-            // nextRoute = graph.dijkstra(nextRoute);
-                
-                totalPrice += actualPrice;
+                totalPrice += currentPrice;
             }
             
-            /*for(int i=0; i < nRotas-1; i++){
-                totalPrice += getLessRoute(weightOfRoutes);
-            }*/
-            //totalPrice += distanceNextRouteToSource + graph.dist[nCidades-1];
-
-            //cout << "Total Price: " << totalPrice << endl;
-            
-            cout << "Instancia " << instancia << endl << totalPrice << endl << endl;
+            cout << "Instancia " << instancia << endl << endl << totalPrice << endl << endl <<endl << endl;
 
         } else if(nRotas > nRotasVoo){
-            cout << "Impossivel";
+            cout << "Instancia " << instancia << endl << endl << "impossivel";
         }
+
+        instancia++;   
     }
     
-
-    //graph.print();
-
-    //cout << "Less Vertex " << graph.dijkstra(0);
-
-    
-
 }
